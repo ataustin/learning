@@ -1,0 +1,76 @@
+---
+title: "Notes: The Unix Workbench"
+author: "Adam Austin"
+output: html_document
+---
+
+## Chapter 4
+
+### Getting help
+
+Help for a known command
+
+`man command_name`
+
+Searching for command names and inside docs
+
+`apropos serach_term`
+
+### Regular expressions
+
+Search a file
+
+`grep "expression" filename.ext`
+
+Extended regular expressions
+
+`egrep "expression" filename.txt`
+
+Same as `grep -E ...` and for GNU `grep`, same as plain ol' `grep` according to the docs on my RHEL.
+
+Fixed regular expressions
+
+`fgrep "expression" filename.txt`
+
+Capturing groups let you search for whole groups at a time, e.g.
+
+`egrep "(iss){2}" states.txt`
+
+searches for 2 instances of "iss" in a single state's names (matches Mississippi).
+
+Arbitrary sets are defined in square brackets, _e.g._ `[0-9]` or `[abc]`.
+
+Anchors are `^` for start and `$` for end.  ("First you get the power, then you get the money.")
+
+You display line numbers with `-n` flag.  You search recursively with `-r`.
+
+#### Metacharacter reference table
+
+
+| Metacharacter |               Meaning                |
+|--------------:|:-------------------------------------|
+|       .       |            Any Character             |
+|      \\w      |                A Word                |
+|      \\W      |              Not a Word              |
+|      \\d      |               A Digit                |
+|      \\D      |             Not a Digit              |
+|      \\s      |              Whitespace              |
+|      \\S      |            Not Whitespace            |
+|     [def]     |         A Set of Characters          |
+|    [^def]     |           Negation of Set            |
+|     [e-q]     |        A Range of Characters         |
+|       ^       |         Beginning of String          |
+|       $       |            End of String             |
+|      \\n      |               Newline                |
+|       +       |       One or More of Previous        |
+|       *       |       Zero or More of Previous       |
+|       ?       |       Zero or One of Previous        |
+|    &#124;     | Either the Previous or the Following |
+|      {6}      |        Exactly 6 of Previous         |
+|    {4, 6}     |     Between 4 and 6 of Previous      |
+|     {4, }     |        4 or more of Previous         |
+
+
+### Finding by file name matching
+
+`find . -name "filename"`
