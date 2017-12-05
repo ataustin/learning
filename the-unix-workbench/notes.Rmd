@@ -71,6 +71,68 @@ You display line numbers with `-n` flag.  You search recursively with `-r`.
 |     {4, }     |        4 or more of Previous         |
 
 
-### Finding by file name matching
+#### Finding by file name matching
 
 `find . -name "filename"`
+
+#### Bash history
+
+The file `~/.bash_history` contains command history.  You can `grep` it!
+
+### File differences
+
+#### Displaying diffs
+
+`diff` and `sdiff` (side-by-side) show file differences.
+
+#### File hashes
+
+You can build an `md5` hash of a file with `md5 filename`.  Two identical files should have the same hash.
+
+And `sha-1` hash is built similarly: `shasum filename`.
+
+### Piping
+
+Send `stdout` from one command as `stdin` to another.  Use it in creative ways, _e.g._ to show the files in a directory that match a pattern with `ls -al | grep "pattern" | less`.
+
+### Make
+
+`make` is a program that that, in early computing, tried to solve the problem of how software should be shared and installed across machines.  The philosophy of `make` is that, to install new software, you download all files for installation to a directory, `cd` to that location, and run `make` to take care of everything else.
+
+A `makefile` specifies the relationship between various files and programs.  `makefile`s illustrate rules.  One such rule:
+
+
+```
+[target]: [dependencies...]
+  [commands...]
+```
+
+Note these must be tab-indented!  To make the target, you run `make target` and the commands under that target are executed.  Making the same target, if nothing needs to be updated, will result in a message telling you that everything is current.  If a dependency gets updated, then running `make` again will update the target.  Here's how to use a dependency:
+
+```
+readme.txt: toc.txt
+  echo "This journal contains the following number of entries:" > readme.txt
+  wc -l toc.txt | egrep -o "[0-9]+" >> readme.txt
+```
+
+Now when `toc.txt` is updated, `make readme.txt` can be rerun to generate the file again.
+
+Using an `all` statement at the top of the `makefile` allows us to simply run `make` to build all files.
+
+`all: file1 file2 file3`
+
+Using a `clean` statement at the end of the `makefile` tells `make` how to clean up at the end.
+
+```
+clean:
+  rm file1
+  rm  file2
+```
+
+Other resources:
+[Karl Broman](https://twitter.com/kwbroman)'s
+[tutorial](http://kbroman.org/minimal_make/) or 
+[Chase Lambert](http://chaselambda.com)'s
+[makefiletutorial.com](http://makefiletutorial.com)
+
+## Chapter 5

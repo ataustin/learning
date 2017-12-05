@@ -1,0 +1,7 @@
+this
+is a dependency
+for another file
+and the whole point
+is to count the lines
+and print that line count
+to the other file that gets made
