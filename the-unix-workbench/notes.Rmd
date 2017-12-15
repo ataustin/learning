@@ -135,4 +135,379 @@ Other resources:
 [Chase Lambert](http://chaselambda.com)'s
 [makefiletutorial.com](http://makefiletutorial.com)
 
+
+
 ## Chapter 5
+
+### Basic math
+
+Use `expr <math expression>` to do math.  `expr` evaluates bash expressions.  Bash does integer division, so `expr 5 / 2` is `2`.  Special operators:
+```
+\*  # you must escape the *
+%   # modulus
+```
+
+To use decimal numbers, it's suggested to pipe a string into the bench calculator (`bc`) and use `-l` to get decimals.  `bc` does not appear to require an escape in front of `*`.
+
+`echo "5 / 2" | bc -l`
+
+However `-l` has some wonky behavior, because `echo "100 % 9" | bc -l` returns `0.00000000000000000001` while removing the flag returns `1` so I don't know what's up with that.
+
+### Using variables
+
+You can store data in variables.  Use lowercase and snake case to avoid overwriting environment variables with your names.  Do not put spaces around the equal sign.
+
+`chapter_number=5`
+
+Print this by `echo`ing with a `$` in front.
+
+`echo $chapter_number`
+
+Use `let` to modify the value.
+
+`let chapter_number=$chapter_number+1`
+
+Use **command substitution** to run a command and assign the output as a string to a variable.
+
+`math_lines=$(cat math.sh | wc -l)`
+
+Use `$variable_name` inside strings to substitute.
+
+`The math file has $math_lines lines.`
+
+You can pass arguments to a shell script.  `$@` denotes the array of arguments.  `$#` counts the arguments.  `$1`, `$2`, etc. represents each argument in turn.
+
+You can prompt a user for input with the `read` command.  Place `read varname` in a script to save the user input as `varname`.
+
+### Logic
+
+The exit status of the last program run is stored in a variable called `?`.  To see it, use `echo $?`.  A successful program exits with status `0`.
+
+Exit status is important when using logical operators `&&` and `||`.  For programs separated by `&&`, the chain of programs continues executing if the previous (left-hand-side) program exited with `0`.  The chain up to the first non-`0` will execute, with their consequences being enacted.  For programs separated by `||`, the programs to the right are only executed if the programs to the left have non-`0` status.  Chaining these together will result in the first non-`0` program's being run.
+
+You can combine `&&` and `||` chains.  `||` takes precedence.
+
+### Conditional expressions
+
+Conditional expressions are logical statements that evaluate to `true` or `false`.  They are written between `[[ ]]` and use logical flags or logical operators.
+
+#### Logical flags
+
+An example of a logical flag is `4 -gt 3` for "4 greater than 3".  To see the result of a logical expression, try this trick:
+
+`[[ your expression here ]] && echo t || echo f`
+
+These so-called binary logical expressions compare values (`4 -gt 3`).  But you can use `unary` logical expressions to check a single value, such as `-e somefile.ext` to check if a file exists.  In logical expressions variables (`$somevar`) behave like raw values, _e.g._ `[[ $somevar -gt 3 ]]`.
+
+Common logical flags:
+
+| Logical Flag | Meaning | Usage |
+|:-------------|:--------|:------|
+| -gt | **G**reater **T**han | `[[ $planets -gt 8 ]]` |
+| -ge | **G**reater Than or **E**qual To | `[[ $votes -ge 270 ]]` |
+| -eq | **Eq**ual | `[[ $fingers -eq 10 ]]` |
+| -ne | **N**ot **E**qual | `[[ $pages -ne 0 ]]` |
+| -le | **L**ess Than or **E**qual To | `[[ $candles -le 9 ]]` |
+| -lt | **L**ess **T**han | `[[ $wives -lt 2 ]]` |
+| -e | A File **E**xists | `[[ -e $taxes_2016 ]]` |
+| -d | A **D**irectory Exists | `[[ -d $photos ]]` |
+| -z | Length of String is **Z**ero | `[[ -z $name ]]` |
+| -n | Length of String is **N**on-Zero | `[[ -n $name ]]` |
+
+
+#### Logical operators
+
+Logical operators perform an action and return a result.  The regex match operator `=~` is a common one which compares a string on the left to a regex on the right.  In the event of a match, the expression evaluates to `true`.
+
+This is false:
+
+`[[ rhythm =~ [aeiou] ]]`
+
+This is true:
+
+```
+word=junk
+[[ $word =~ j.*k& ]]
+```
+
+The NOT operator `!` reverses a `true` or `false`.
+
+Common logical operators:
+
+
+| Logical Operator | Meaning | Usage |
+|:-------------|:--------|:------|
+| =~ | Matches Regular Expression | `[[ $consonants =~ [aeiou] ]]` |
+| = | String Equal To | `[[ $password = "pegasus" ]]` |
+| != | String Not Equal To | `[[ $fruit != "banana" ]]` |
+| ! | Not | `[[ ! "apple" =~ ^b ]]` |
+
+
+### If and Else
+
+Use conditional expressions to control bash programs.
+
+Here's a simple one:
+
+```
+if [[ some condition ]]
+then
+    some action
+fi
+```
+
+You can add `else` statements too:
+
+```
+if [[ some condition ]]
+then
+    action1
+else
+    action2
+fi
+```
+
+If your conditional expression is looking for arguments from the command line, but you don't supply one, your expression will probably evaluate to `false`.  I guess?
+
+You can also use `elif` statements.  These work just like `if` statements.
+
+```
+if [[ condition1 ]]
+then
+    action1
+elif [[ condition2 ]]
+then
+    action2
+else
+    action3
+fi
+```
+
+You can, of course, combine conditional expressions and if/else logic.
+ 
+```
+if [[ some condition ]] && [[ some other condition ]]
+then
+   do something
+else
+    do something else
+fi
+```
+
+You can nest `if` statements as well.
+
+```
+if [[ condition1 ]]
+then
+    if [[ condition2 ]]
+    then
+        action1
+    elif [[ condition3 ]]
+    then
+        action2
+    else
+        action3
+    fi
+else
+    action4
+fi
+```
+
+### Arrays
+
+Arrays are ordered lists of values, created within `()`, separating elements with spaces.  You can assign these to a variable.  Access the array with "parameter expansion", i.e. `echo ${array_name[*]}`.  You can select elements with `[]` indexing starting from 0.
+
+```
+myarray=(item1 item2 item3 item4)
+array_item2=${my_array[1]}
+echo ${myarray[*]}
+```
+
+Directly reassign elements the way you'd think: `myarray[2]=newitem`.  You can index past the end of your array to extend it.
+
+Subset the array with `${myarray[*]:start_index:n_elements}`.
+
+Use `#` to get the array length: `${#myarray[*]}`.
+
+Add an array to the end of an existing array with `+=`, as in `myarray+=(newitem1 newitem2 newitem3)`.
+
+
+### Braces
+
+"Brace expansion" uses `{ .. }` to create a sequence of letters or numbers, _e.g._ `echo {0..9}` to get numbers 1 through 9.  This works for upper- and lower-case letters as well.  Putting strings on either side of the braces will paste the string to each element, _e.g._ `echo a{1..4}`.  Or concatenate braces for a cross-join of the elements, _e.g._ `echo {1..3}{A..C}`.
+
+To use variables in braces, you must evaluate the expression with `eval`.
+
+`eval echo {$start..$end}`
+
+Concatenate sequences with a comma inside of brackets, _e.g._ `echo {{1..3},{a..c}}` or `echo {A,B,Y,Z}`.
+
+
+### Loops
+
+#### for-loops
+
+Syntax:
+
+```
+for variable in [sequence]
+do
+    some action with variable
+done
+```
+
+Valid sequences are brace expansions:
+
+`for i in {1..5}`
+
+lists of strings
+
+`for i in item1 item2 item3`
+
+arrays
+
+`for element in ${myarray[*]}`
+
+and command substitutions
+
+`for item in $(ls)`.
+
+
+#### while-loops
+
+While-loops use conditional expressions:
+
+```
+count=3
+while [[ $count -gt 0 ]]
+do
+    echo "count is equal to $count"
+    let count=$count-1
+done
+```
+
+
+#### Nesting
+
+For-loops and while-loops can be nested inside each other.
+
+```
+for number in {1..3}
+do
+  for letter in a b
+  do
+    echo "number is $number, letter is $letter"
+  done
+done
+```
+
+You can also next `if` statements!
+
+```
+for number in {1..10}
+do
+  if [[ $number -lt 3 ]] || [[ $number -gt 8 ]]
+  then
+    echo $number
+  fi
+done
+```
+
+
+
+### Functions
+
+Syntax:
+
+```
+function fun_name {
+  code
+}
+```
+
+The usual bash arguments _e.g._ `$1`, `$2`, `$@`, work as inputs to function bodies (definitions).  To bring functions defined in a script into the current session, use `source scriptname.sh`.  Remember, if you need to loop over every input element do something like `for elt in $@`.
+
+Functions are used primarily for computing values and for side effects.  Functions that have side effects include `mv` and `cp`, and such functions don't print values when they succeed.
+
+You can retrieve values returned by functions.  Variables created inside functions become globally available, so you can use them with the usual `$varname` convention.  Note that this is considered to be a side-effect.  It will overwrite variables that might be used at the global shell prompt.  Avoid this with the `local` keyword when defining variables in function bodies.
+
+```
+function add_seq {  # adds all numbers of an array
+  local sum=0
+  for element in #@; do;
+    let sum=sum+$element
+  done
+  echo $sum
+}
+```
+
+Now use command substitution to capture the output.
+
+```
+my_sum=$(add_seq 1 2 3 4)
+```
+
+
+### Writing programs
+
+Ken Thompson: each Unix program should do one thing well.  Limit program size for code readability, debuggability, and composability.  Composability is demonstrated through the `|` operator.  Consider whether your program could be used in a pipeline and organize the code accordingly.
+
+The idea of "quietness" means that a function should not print to the console if it doesn't have to.  Cases for printing are: inform the user of a value (_e.g._ `pwd`), display the result of a computation, or signal an error.
+
+#### Executables
+
+`ls -l` prints permissions information.  We can grant read (`r`), write (`w`), and execute (`x`) permissions.  Permissions are listed in threes, for `owner`, `group`, and `all`.  The `chmod` command changes permissions.
+
+`chmod` takes the following arguments.  First we can specify which set of users we're going to change
+permissions for:
+
+|Character  |Meaning |
+|:----------|:-------|
+|`u` |The owner of the file |
+|`g` |The group that the file belongs to |
+|`o` |Everyone else  |
+|`a` |Everyone above |
+
+We then need to specify whether we're going to add, remove, or set the
+permission:
+
+|Character  |Meaning |
+|:----------|:-------|
+|`+` |Add permission |
+|`-` |Remove permission |
+|`=` |Set permission  |
+
+Finally we specify what permission we're changing:
+
+|Character  |Meaning |
+|:----------|:-------|
+|`r` |Read a file |
+|`w` |Write to or edit a file |
+|`x` |Execute a file  |
+
+Making a file executable means we only have to type the name of the file to run it.
+
+`chmod u+x filename`
+
+Generally speaking one must prepend the file path in order to run a program, even if it's in the same directory such as `./filename`.  But this does not always seem to be the case.  Always put a shebang at the top of executables.
+
+#### Environment variables
+
+To use executable scripts as shell commands, we must put them in the `PATH`, which is an environment variable.  Environment variables are created by bash and store data about the current computing environment.  They are all capitalized.  Some examples: `HOME`, `PWD`, `PATH`.
+
+Changing the `PATH` variable allows us to make a program available as a command.  When the shell initializes it searches the directories in `PATH` for executables and makes the commands available to the shell.  Adding a directory to the with executables in it to the `PATH` makes them available.
+
+The `PATH` must be modified every new session, so place the modifications in the `.bashrc` (or `.bash_profile`) like so:
+
+`export PATH=/path/to/commands:$PATH`
+
+Alternatively you can add lines in the `.bashrc` to source individual files.
+
+
+
+## Ch 6: Git
+
+Undo the most recent commit:
+
+`git reset --soft HEAD~`
+This keeps the files staged but reverts the commit.
