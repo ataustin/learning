@@ -14,7 +14,7 @@ Help for a known command
 
 Searching for command names and inside docs
 
-`apropos serach_term`
+`apropos search_term`
 
 ### Regular expressions
 
@@ -56,8 +56,8 @@ You display line numbers with `-n` flag.  You search recursively with `-r`.
 |      \\D      |             Not a Digit              |
 |      \\s      |              Whitespace              |
 |      \\S      |            Not Whitespace            |
-|     [def]     |         A Set of Characters          |
-|    [^def]     |           Negation of Set            |
+|     [abcd]     |         A Set of Characters          |
+|    [^abcd]     |           Negation of Set            |
 |     [e-q]     |        A Range of Characters         |
 |       ^       |         Beginning of String          |
 |       $       |            End of String             |
@@ -126,7 +126,7 @@ Using a `clean` statement at the end of the `makefile` tells `make` how to clean
 ```
 clean:
   rm file1
-  rm  file2
+  rm file2
 ```
 
 Other resources:
@@ -173,7 +173,7 @@ Use **command substitution** to run a command and assign the output as a string 
 
 Use `$variable_name` inside strings to substitute.
 
-`The math file has $math_lines lines.`
+`echo "The math file has $math_lines lines."`
 
 You can pass arguments to a shell script.  `$@` denotes the array of arguments.  `$#` counts the arguments.  `$1`, `$2`, etc. represents each argument in turn.
 
@@ -183,7 +183,7 @@ You can prompt a user for input with the `read` command.  Place `read varname` i
 
 The exit status of the last program run is stored in a variable called `?`.  To see it, use `echo $?`.  A successful program exits with status `0`.
 
-Exit status is important when using logical operators `&&` and `||`.  For programs separated by `&&`, the chain of programs continues executing if the previous (left-hand-side) program exited with `0`.  The chain up to the first non-`0` will execute, with their consequences being enacted.  For programs separated by `||`, the programs to the right are only executed if the programs to the left have non-`0` status.  Chaining these together will result in the first non-`0` program's being run.
+Exit status is important when using logical operators `&&` and `||`.  For programs separated by `&&`, the chain of programs continues executing if the previous (left-hand-side) program exited with `0`.  The chain up to the first non-`0` will execute, with all their attendant consequences.  For programs separated by `||`, the programs to the right are only executed if the programs to the left have non-`0` status.  Chaining these together will result in the first non-`0` program's being run.
 
 You can combine `&&` and `||` chains.  `||` takes precedence.
 
@@ -495,7 +495,7 @@ Generally speaking one must prepend the file path in order to run a program, eve
 
 To use executable scripts as shell commands, we must put them in the `PATH`, which is an environment variable.  Environment variables are created by bash and store data about the current computing environment.  They are all capitalized.  Some examples: `HOME`, `PWD`, `PATH`.
 
-Changing the `PATH` variable allows us to make a program available as a command.  When the shell initializes it searches the directories in `PATH` for executables and makes the commands available to the shell.  Adding a directory to the with executables in it to the `PATH` makes them available.
+Changing the `PATH` variable allows us to make a program available as a command.  When the shell initializes it searches the directories in `PATH` for executables and makes the commands available to the shell.  Adding a directory with executables in it to the `PATH` makes them available.
 
 The `PATH` must be modified every new session, so place the modifications in the `.bashrc` (or `.bash_profile`) like so:
 
@@ -507,7 +507,110 @@ Alternatively you can add lines in the `.bashrc` to source individual files.
 
 ## Ch 6: Git
 
+### Getting started
+
 Undo the most recent commit:
 
 `git reset --soft HEAD~`
 This keeps the files staged but reverts the commit.
+
+
+### Help, logs, and diffs
+
+Get help on a `git` command with `git help [command]` _e.g._ `git help status`.
+
+
+### Branching
+
+`HEAD` represents the most recent commit on the branch which is currently checked out.
+
+
+### GitHub
+
+To add a remote, use `git remote add [remote-name] [URL]`.  If it's a new repository, the remote name should be `origin`.  If you've forked a repo, then YOUR copy of the repo will be `origin` and you can add the upstream repo as `upstream`.
+
+For the first push to `origin` from a local repo that has just added `origin` at the command line, use the `-u` flag.  This sets `origin` as the default remote repository.
+
+#### Markdown readme
+
+Markdown is a markup language.  Markup langauges are sets of rules for adding decorative features to text.  HTML, XML, and LaTeX are examples.  GitHub transforms `.md` files into HTML web pages in your repo.  Any folder can have a `README.md` that GitHub will render for you.  GitHub comments accept markdown as well.
+
+
+## Chapter 7: Nephology
+
+### Moving stuff in the cloud
+
+The `scp` command lets you move files between local machines and cloud machines.
+
+### Talking to servers
+
+A popular command-line program for talking to servers is called `curl`.  The command lets us send requests and information to other servers.  To download with `curl`, we do:
+
+`curl -O http://site.com/file.ext`
+
+Use `curl` to communicate with APIs as well.  Simply make a call to `curl https://api.sitename.come/blah/blah` to receive `stdout` with the API's response.  Note that `curl` sends HTTP requests, which have different categories called verbs.  The default verb sent by `curl` is GET.  These "GET requests" ask servers to send data to their IP address.
+
+Generally you add arguments to an HTTP API request by appending `?arg` to the API's URL, e.g.
+
+`curl http://some.site.com/dir?argument_value`
+
+But usually we have to specify the argument's name, such as
+
+`curl http://some.site.com/dir?argument_name=argument_value`.
+
+Separate arguments with the ampersand:
+
+`curl http://some.site.com/dir?arg1=value1&arg2=value2`
+
+
+### Automating tasks
+
+A common program to execute other programs on a schedule is `cron`, a program that is called a daemon and is always running in the background (if enabled; use `ps -A | grep "cron"` to see if it is running).  To assign programs to be executed by `cron`, we edit a text file called a `cron` table.  If enabled, use `select-editor` to choose a default text editor.  Then use `crontab -e` (cron table edit) which will open the `cron` table in the default editor.  Add instructions to the `cron` table as follows:
+
+`m h dom mon dow command`
+
+where the abbreviations specify when to run the job, given by
+
+1. Minute (`m`)
+2. Hour (`h`)
+3. Day of Month (`dom`)
+4. Month (`mon`)
+5. Day of Week (`dow`)
+
+and the space-separated columns take on valid values
+
+1. Minute: `00 - 59` (A particular minute in an hour)
+2. Hour: `00 - 23` (0 is the midnight hour)
+3. Day of Month: `01 - 31` (1 is the first day of the month)
+4. Month: `01 - 12` (1 is January)
+5. Day of Week `0 - 6` (0 is Sunday).
+
+A `*` is a valid value which means "run every [unit]", _e.g._ `*` in the `h` column means "run every hour".  So to print the date to a file every minute of every hour, you would do
+
+`* * * * * date >> ~/date-file.txt`.
+
+Once the `cron` table is saved, the job can begin at the next scheduled interval.   Typically the command for the `cron` job is `bash something.sh`.
+
+Here is a look at recurring `cron` jobs:
+
+```
+# m h  dom mon dow   command
+00 * * * * bash /path/to/script.sh     # Runs every hour at the start of the hour
+00 12 * * * bash /path/to/script.sh    # Runs every day at noon
+* 12 * * * bash /path/to/script.sh     # Runs every minute between 12pm and 12:59pm
+00 00 05 * * bash /path/to/script.sh   # Runs the 5th day of every month at midnight
+00 00 * 07 * bash /path/to/script.sh   # Runs every day in the month of July at midnight
+00 00 * * 2 bash /path/to/script.sh    # Runs every Tuesday at midnight
+```
+
+You can also use `-` for ranges and `,` for items in a list.  Here are some examples:
+
+```
+# m h  dom mon dow   command
+00-04 * * * * bash /path/to/script.sh       # Runs every minute for the first five minutes of every hour
+00 00 * * 0,6 bash /path/to/script.sh       # Runs at midnight every Saturday and Sunday
+00 03 01-15 * * bash /path/to/script.sh     # Runs at 3am for the first fifteen days of every month 
+00,30 * * * * bash /path/to/script.sh       # Runs at the start and middle of every hour
+00 00,12 * * * bash /path/to/script.sh      # Runs every day at midnight and noon
+00 * 01-07 01,06 * bash /path/to/script.sh  # Runs at the start of every hour for the first seven days of the months of January and June
+```
